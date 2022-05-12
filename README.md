@@ -1,5 +1,5 @@
 # Corex-bot
-An ofiical Corex bot. 
+An offical Corex bot. 
 
 ## Contributing
 
