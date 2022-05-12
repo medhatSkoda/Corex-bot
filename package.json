@@ -1,0 +1,24 @@
+{
+  "name": "corex-bot",
+  "version": "1.0.0",
+  "description": "An offical Corex bot.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Project-Corex/Corex-bot.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Project-Corex/Corex-bot/issues"
+  },
+  "homepage": "https://github.com/Project-Corex/Corex-bot#readme",
+  "dependencies": {
+    "discord.js": "^13.6.0",
+    "dotenv": "^16.0.1"
+  }
+}
