@@ -16,6 +16,7 @@ const client = new Client({
 		Intents.FLAGS.GUILD_EMOJIS_AND_STICKERS,
 		Intents.FLAGS.GUILD_MESSAGES,
 		Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+		Intents.FLAGS.GUILD_MEMBERS,
     ] 
 });
 discordModals(client);
@@ -44,7 +45,7 @@ const errorEmbed = new MessageEmbed()
 	.setDescription('Hey there! Unfortunately, an internal error has occurred inside the bot, so this command is currently unavailable. Please try again later.')
 	.addField('Error:', '```\nUndefined error\n```');
 
-
+//Feedback modal
 const feedbackModal = new Modal() 
 	.setCustomId('feedback-modal')
 	.setTitle('Give feedback to Project Corex')
@@ -67,7 +68,7 @@ const feedbackModal = new Modal()
 	  .setRequired(false)
 	);
 
-
+//Suggestion modal
 const suggestionModal = new Modal()
 	.setCustomId('suggestion-modal')
 	.setTitle('Make a suggestion for Project Corex')
@@ -89,6 +90,7 @@ client.on('interactionCreate', async interaction => {
 
 	if (!command) return;
 
+	//Check for any errors
 	try {
 		await command.execute(interaction);
 	} catch (error) {
@@ -96,8 +98,7 @@ client.on('interactionCreate', async interaction => {
 		await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
 	}
 	
-	console.log(`${interaction.user.tag} in #${interaction.channel.name} triggered an interaction.`);
-
+	//Feedback and suggestion modals
 	if(interaction.commandName === 'feedback') {
 		showModal(feedbackModal, {
 		  client: client, 
@@ -111,8 +112,35 @@ client.on('interactionCreate', async interaction => {
 		  interaction: interaction 
 		})
 	}
+
+
+	//Info commands
+	if (interaction.options.getSubcommand() === 'user') {
+		const user = interaction.options.getUser('user');
+		const guild = client.guilds.cache.get(process.env.GUILD_ID);
+		const member = await guild.members.fetch(user);
+		if (user) {
+			const userInfoEmbed = new MessageEmbed()
+				.setColor('#705cf4')
+				.setAuthor({ name: `${user.tag}`, iconURL: user.displayAvatarURL() })
+				.setThumbnail(user.displayAvatarURL())
+				.setDescription(`<@${user.id}>`)
+				.addFields(
+					{ name: 'Created at:', value: `<t:${Math.round(user.createdTimestamp / 1000)}>`, inline: true },
+					{ name: 'Joined at:', value: `<t:${Math.round(member.joinedAt / 1000)}>`, inline: true },
+				)
+			await interaction.reply({ embeds: [userInfoEmbed], ephemeral: true });
+		} else {
+			
+			await interaction.reply(`Your username: ${interaction.user.username}\nYour ID: ${interaction.user.id}`);
+		}
+	} else if (interaction.options.getSubcommand() === 'server') {
+		await interaction.reply(`Server name: ${interaction.guild.name}\nTotal members: ${interaction.guild.memberCount}`);
+	}
 });
 
+
+//Send suggestion and feedback modals
 client.on('modalSubmit', async (modal) => {
 	if(modal.customId === 'feedback-modal'){
 	  const firstResponse = modal.getTextInputValue('feedback-textinput');
@@ -129,6 +157,7 @@ client.on('modalSubmit', async (modal) => {
 	  });
 	}  
 
+	//Suggestion modal
 	if(modal.customId === 'suggestion-modal'){
 		const suggestion = modal.getTextInputValue('suggestion-textinput');
 		const suggestionEmbed = new MessageEmbed()
@@ -149,5 +178,19 @@ client.on('messageCreate', async message => {
 		message.react('👎');
 	}
 });
+
+//Random welcoming message
+client.on('guildMemberAdd', member => {
+	const welcomingMessages = [
+		`<@${member.user.id}> just slid into the server. <a:aniblobcool:975095747890532412>`,
+		`A <@${member.user.id}> has spawned in the server. <a:blobcathug:975096179736059954>`,
+		`Swoooosh. <@${member.user.id}> just landed.`
+		`We've been expecting you <@${member.user.id}>. <a:aniblobcool:975095747890532412>`,
+		`<@${member.user.id}> just joined the server. <a:blob_dance:975096214917890088>`,
+	];
+	const random = welcomingMessages[Math.floor(Math.random() * welcomingMessages.length)];
+	client.channels.cache.get('935550475317682241').send(random);
+})
+
 // Login to Discord
 client.login(token);

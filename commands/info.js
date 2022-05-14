@@ -8,9 +8,12 @@ module.exports = {
 		subcommand
 			.setName('user')
 			.setDescription('Info about a user')
-			.addUserOption(option => option.setName('target').setDescription('The user')))
+			.addUserOption(option => option.setName('user').setDescription('The user to get information about')))
 	.addSubcommand(subcommand =>
 		subcommand
 			.setName('server')
-			.setDescription('Info about the server'))
+			.setDescription('Info about the server')),
+	async execute(interaction) {
+        
+	},
 };
