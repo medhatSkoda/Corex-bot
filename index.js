@@ -13,6 +13,9 @@ dotenv.config();
 const client = new Client({
     intents: [
         Intents.FLAGS.GUILDS, 
+		Intents.FLAGS.GUILD_EMOJIS_AND_STICKERS,
+		Intents.FLAGS.GUILD_MESSAGES,
+		Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
     ] 
 });
 discordModals(client);
@@ -42,7 +45,7 @@ const errorEmbed = new MessageEmbed()
 	.addField('Error:', '```\nUndefined error\n```');
 
 
-const modal = new Modal() 
+const feedbackModal = new Modal() 
 	.setCustomId('feedback-modal')
 	.setTitle('Give feedback to Project Corex')
 	.addComponents(
@@ -64,6 +67,21 @@ const modal = new Modal()
 	  .setRequired(false)
 	);
 
+
+const suggestionModal = new Modal()
+	.setCustomId('suggestion-modal')
+	.setTitle('Make a suggestion for Project Corex')
+	.addComponents(
+		new TextInputComponent()
+		.setCustomId('suggestion-textinput')
+		.setLabel('Suggestion')
+		.setStyle('LONG')
+		.setMinLength(5)
+		.setMaxLength(500)
+		.setPlaceholder('Your suggestion here...')
+		.setRequired(true),
+	);
+
 client.on('interactionCreate', async interaction => {
 	if (!interaction.isCommand()) return;
 
@@ -81,7 +99,14 @@ client.on('interactionCreate', async interaction => {
 	console.log(`${interaction.user.tag} in #${interaction.channel.name} triggered an interaction.`);
 
 	if(interaction.commandName === 'feedback') {
-		showModal(modal, {
+		showModal(feedbackModal, {
+		  client: client, 
+		  interaction: interaction 
+		})
+	}
+
+	if(interaction.commandName === 'suggestion') {
+		showModal(suggestionModal, {
 		  client: client, 
 		  interaction: interaction 
 		})
@@ -95,16 +120,34 @@ client.on('modalSubmit', async (modal) => {
 	  const feedbackEmbed = new MessageEmbed()
 		.setColor('#705cf4')
 		.setAuthor({ name: `Feedback from ${modal.user.username}`, iconURL: modal.user.avatarURL() })
-		.setDescription(`${firstResponse}\n**Questions?**\n${secondResponse}`)
+		.setDescription(`> ${firstResponse}\n**Questions?**\n> ${secondResponse}`)
 		.setTimestamp();
 
 	  await modal.deferReply({ ephemeral: true })
-	  modal.followUp({ content: 'Your application is ready to be reviewed' + Formatters.codeBlock('markdown', firstResponse, secondResponse), ephemeral: true }).then(() => {
-		client.channels.cache.get('975028730827251762').send({ embeds: [feedbackEmbed] });
+	  modal.followUp({ content: 'Your feedback is ready to be reviewed' + Formatters.codeBlock('markdown', firstResponse, secondResponse), ephemeral: true }).then(() => {
+		client.channels.cache.get('975042999920783390').send({ embeds: [feedbackEmbed] });
 	  });
-	  
-	  
 	}  
+
+	if(modal.customId === 'suggestion-modal'){
+		const suggestion = modal.getTextInputValue('suggestion-textinput');
+		const suggestionEmbed = new MessageEmbed()
+			.setColor('#705cf4')
+			.setAuthor({ name: `Suggestion from ${modal.user.username}`, iconURL: modal.user.avatarURL() })
+			.setDescription(`> ${suggestion}`)
+			.setTimestamp();
+		await modal.deferReply({ ephemeral: true })
+		modal.followUp({ content: 'Your suggestion is ready to be reviewed' + Formatters.codeBlock('markdown', suggestion), ephemeral: true }).then(() => {
+			client.channels.cache.get('975028730827251762').send({ embeds: [suggestionEmbed] });
+		});
+	}	
+});
+
+client.on('messageCreate', async message => {
+	if (message.channelId === '975028730827251762'){
+		message.react('👍');
+		message.react('👎');
+	}
 });
 // Login to Discord
 client.login(token);
