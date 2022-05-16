@@ -113,6 +113,10 @@ client.on('interactionCreate', async interaction => {
 		})
 	}
 
+	if (interaction.commandName === 'simjoin') {
+		client.emit('guildMemberAdd', interaction.member);
+	}
+
 
 	//Info commands
 	if (interaction.options.getSubcommand() === 'user') {
@@ -181,15 +185,15 @@ client.on('messageCreate', async message => {
 
 //Random welcoming message
 client.on('guildMemberAdd', member => {
-	const welcomingMessages = [
+	let welcomingMessages = [
 		`<@${member.user.id}> just slid into the server. <a:aniblobcool:975095747890532412>`,
 		`A <@${member.user.id}> has spawned in the server. <a:blobcathug:975096179736059954>`,
-		`Swoooosh. <@${member.user.id}> just landed.`
-		`We've been expecting you <@${member.user.id}>. <a:aniblobcool:975095747890532412>`,
-		`<@${member.user.id}> just joined the server. <a:blob_dance:975096214917890088>`,
+		`Swoooosh. <@${member.user.id}> just landed.`,
+		`We have been expecting you <@${member.user.id}>. <a:aniblobcool:975095747890532412>`,
+		`<@${member.user.id}> just joined the server. <a:blob_dance:975096214917890088>`
 	];
-	const random = welcomingMessages[Math.floor(Math.random() * welcomingMessages.length)];
-	client.channels.cache.get('935550475317682241').send(random);
+	let random = welcomingMessages[Math.floor(Math.random() * welcomingMessages.length)];
+	client.channels.cache.get('935550475317682241').send(welcomingMessages[random]);
 })
 
 // Login to Discord
